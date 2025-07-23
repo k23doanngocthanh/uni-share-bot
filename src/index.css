@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* University Document Sharing Design System 
 All colors MUST be HSL.
 */
 
@@ -17,8 +17,22 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* University theme - Academic blue */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 98%;
+    --primary-glow: 217 91% 70%;
+    
+    /* Academic gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 70%));
+    --gradient-hero: linear-gradient(135deg, hsl(217 91% 60%), hsl(240 100% 85%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(217 91% 98%));
+    
+    /* Academic shadows */
+    --shadow-academic: 0 10px 30px -10px hsl(217 91% 60% / 0.3);
+    --shadow-card: 0 4px 20px hsl(217 91% 60% / 0.1);
+    
+    /* Smooth transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;

@@ -14,7 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      documents: {
+        Row: {
+          created_at: string
+          description: string | null
+          file_id: string
+          file_name: string
+          file_size: number | null
+          file_unique_id: string | null
+          id: string
+          major: string | null
+          mime_type: string | null
+          school: string | null
+          tags: string[] | null
+          telegram_user_id: number
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          file_id: string
+          file_name: string
+          file_size?: number | null
+          file_unique_id?: string | null
+          id?: string
+          major?: string | null
+          mime_type?: string | null
+          school?: string | null
+          tags?: string[] | null
+          telegram_user_id: number
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          file_id?: string
+          file_name?: string
+          file_size?: number | null
+          file_unique_id?: string | null
+          id?: string
+          major?: string | null
+          mime_type?: string | null
+          school?: string | null
+          tags?: string[] | null
+          telegram_user_id?: number
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
