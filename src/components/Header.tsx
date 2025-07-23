@@ -31,16 +31,49 @@ const Header = ({ user, onLoginClick, onProfileClick, onUploadClick, UserMenuCom
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a 
+              href="#" 
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            >
               Trang chủ
             </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a 
+              href="#documents" 
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                const documentsSection = document.getElementById('documents');
+                if (documentsSection) {
+                  documentsSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+            >
               Tài liệu
             </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a 
+              href="#" 
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                // TODO: Add help page
+                alert('Trang hướng dẫn đang được phát triển!');
+              }}
+            >
               Hướng dẫn
             </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+            <a 
+              href="#" 
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                // TODO: Add contact page
+                alert('Trang liên hệ đang được phát triển!');
+              }}
+            >
               Liên hệ
             </a>
           </nav>
@@ -86,16 +119,51 @@ const Header = ({ user, onLoginClick, onProfileClick, onUploadClick, UserMenuCom
           isMobileMenuOpen ? "max-h-64 border-t border-border/40" : "max-h-0"
         )}>
           <nav className="py-4 space-y-4">
-            <a href="#" className="block text-muted-foreground hover:text-foreground transition-colors">
+            <a 
+              href="#" 
+              className="block text-muted-foreground hover:text-foreground transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setIsMobileMenuOpen(false);
+              }}
+            >
               Trang chủ
             </a>
-            <a href="#" className="block text-muted-foreground hover:text-foreground transition-colors">
+            <a 
+              href="#documents" 
+              className="block text-muted-foreground hover:text-foreground transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                const documentsSection = document.getElementById('documents');
+                if (documentsSection) {
+                  documentsSection.scrollIntoView({ behavior: 'smooth' });
+                }
+                setIsMobileMenuOpen(false);
+              }}
+            >
               Tài liệu
             </a>
-            <a href="#" className="block text-muted-foreground hover:text-foreground transition-colors">
+            <a 
+              href="#" 
+              className="block text-muted-foreground hover:text-foreground transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                alert('Trang hướng dẫn đang được phát triển!');
+                setIsMobileMenuOpen(false);
+              }}
+            >
               Hướng dẫn
             </a>
-            <a href="#" className="block text-muted-foreground hover:text-foreground transition-colors">
+            <a 
+              href="#" 
+              className="block text-muted-foreground hover:text-foreground transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                alert('Trang liên hệ đang được phát triển!');
+                setIsMobileMenuOpen(false);
+              }}
+            >
               Liên hệ
             </a>
             <div className="pt-2 border-t border-border/40">

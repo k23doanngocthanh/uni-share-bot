@@ -84,12 +84,12 @@ export const SearchFilters = ({
               <School className="h-4 w-4 text-primary" />
               Trường
             </label>
-            <Select value={selectedSchool} onValueChange={onSchoolChange}>
+            <Select value={selectedSchool || "all"} onValueChange={onSchoolChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Chọn trường..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tất cả trường</SelectItem>
+                <SelectItem value="all">Tất cả trường</SelectItem>
                 {availableSchools.map((school) => (
                   <SelectItem key={school} value={school}>
                     {school}
@@ -105,12 +105,12 @@ export const SearchFilters = ({
               <GraduationCap className="h-4 w-4 text-primary" />
               Ngành
             </label>
-            <Select value={selectedMajor} onValueChange={onMajorChange}>
+            <Select value={selectedMajor || "all"} onValueChange={onMajorChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Chọn ngành..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tất cả ngành</SelectItem>
+                <SelectItem value="all">Tất cả ngành</SelectItem>
                 {availableMajors.map((major) => (
                   <SelectItem key={major} value={major}>
                     {major}
@@ -131,7 +131,7 @@ export const SearchFilters = ({
               {selectedSchool}
               <X
                 className="h-3 w-3 cursor-pointer hover:text-destructive"
-                onClick={() => onSchoolChange("")}
+                onClick={() => onSchoolChange("all")}
               />
             </Badge>
           )}
@@ -141,7 +141,7 @@ export const SearchFilters = ({
               {selectedMajor}
               <X
                 className="h-3 w-3 cursor-pointer hover:text-destructive"
-                onClick={() => onMajorChange("")}
+                onClick={() => onMajorChange("all")}
               />
             </Badge>
           )}

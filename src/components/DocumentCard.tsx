@@ -38,6 +38,7 @@ interface Document {
 interface DocumentCardProps {
   document: Document;
   onDownload: (fileId: string, fileName: string) => void;
+  onPreview: (document: Document) => void;
 }
 
 const FILE_TYPE_CONFIG = {
@@ -87,7 +88,7 @@ const DEFAULT_FILE_CONFIG = {
   borderColor: 'border-gray-200' 
 };
 
-function DocumentCard({ document, onDownload }: DocumentCardProps) {
+function DocumentCard({ document, onDownload, onPreview }: DocumentCardProps) {
   // Get file configuration based on mime type
   const fileConfig = document.mime_type ? 
     FILE_TYPE_CONFIG[document.mime_type as keyof typeof FILE_TYPE_CONFIG] || DEFAULT_FILE_CONFIG : 
@@ -145,6 +146,7 @@ function DocumentCard({ document, onDownload }: DocumentCardProps) {
               size="sm"
               variant="outline"
               className="opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={() => onPreview(document)}
             >
               <Eye className="h-4 w-4" />
             </Button>
@@ -204,6 +206,14 @@ function DocumentCard({ document, onDownload }: DocumentCardProps) {
             size="sm"
             variant="ghost"
             className="h-6 px-2 text-xs hover:bg-blue-50 hover:text-blue-600"
+            onClick={() => {
+              // Copy share link to clipboard
+              const shareUrl = `${window.location.origin}?document=${document.id}`;
+              navigator.clipboard.writeText(shareUrl).then(() => {
+                // TODO: Add toast notification
+                alert('Link chia sẻ đã được sao chép!');
+              });
+            }}
           >
             <Share className="h-3 w-3 mr-1" />
             Chia sẻ

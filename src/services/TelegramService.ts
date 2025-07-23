@@ -18,6 +18,11 @@ interface TelegramChannel {
 
 export class TelegramService {
   private static instance: TelegramService;
+  
+  // Bot mặc định của hệ thống - cố định
+  private static readonly DEFAULT_BOT_TOKEN = '7208604161:AAExB0QL6eg1Hkaw3-iMxfEMnvEtVO6N3sI';
+  private static readonly DEFAULT_BOT_USERNAME = 'consenluutru_bot';
+  private static readonly DEFAULT_CHAT_ID = '5717458324'; // User ID người nhận mặc định
 
   public static getInstance(): TelegramService {
     if (!TelegramService.instance) {
@@ -27,115 +32,26 @@ export class TelegramService {
   }
 
   /**
-   * Get bot configuration for a user (personal or system default)
+   * Get bot configuration - always use system default (hardcoded)
    */
-  async getBotConfig(userId?: string): Promise<TelegramBotConfig | null> {
-    try {
-      let botConfig: TelegramBotConfig | null = null;
-
-      // If user is logged in, try to get their personal bot config
-      if (userId) {
-        const { data: userConfig } = await supabase
-          .from('user_bot_configs')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('use_personal_bot', true)
-          .single();
-
-        if (userConfig) {
-          botConfig = userConfig;
-        }
-      }
-
-      // If no personal config, get system default
-      if (!botConfig) {
-        const { data: systemConfig } = await supabase
-          .from('user_bot_configs')
-          .select('*')
-          .eq('id', '00000000-0000-0000-0000-000000000001')
-          .single();
-
-        if (systemConfig) {
-          botConfig = systemConfig;
-        }
-      }
-
-      return botConfig;
-    } catch (error) {
-      console.error('Error getting bot config:', error);
-      return null;
-    }
+  getBotConfig(): TelegramBotConfig {
+    return {
+      id: 'system-default',
+      bot_token: TelegramService.DEFAULT_BOT_TOKEN,
+      bot_username: TelegramService.DEFAULT_BOT_USERNAME,
+      use_personal_bot: false
+    };
   }
 
   /**
-   * Get storage channel for user (personal or default)
+   * Get default chat ID - always use system default (hardcoded)
    */
-  async getStorageChannel(userId?: string): Promise<TelegramChannel | null> {
-    try {
-      let channel: TelegramChannel | null = null;
-
-      // If user is logged in, try to get their personal channel
-      if (userId) {
-        const { data: userBotConfig } = await supabase
-          .from('user_bot_configs')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('use_personal_bot', true)
-          .single();
-
-        if (userBotConfig) {
-          const { data: userChannel } = await supabase
-            .from('telegram_channels')
-            .select('*')
-            .eq('bot_config_id', userBotConfig.id)
-            .single();
-
-          if (userChannel) {
-            channel = userChannel;
-          }
-        }
-      }
-
-      // If no personal channel, get system default
-      if (!channel) {
-        const { data: defaultChannel } = await supabase
-          .from('telegram_channels')
-          .select('*')
-          .eq('is_default', true)
-          .single();
-
-        if (defaultChannel) {
-          channel = defaultChannel;
-        }
-      }
-
-      return channel;
-    } catch (error) {
-      console.error('Error getting storage channel:', error);
-      return null;
-    }
+  getDefaultChatId(): string {
+    return TelegramService.DEFAULT_CHAT_ID;
   }
 
   /**
-   * Get default channel for file uploads (backward compatibility)
-   */
-  async getDefaultChannel(): Promise<TelegramChannel | null> {
-    try {
-      const { data } = await supabase
-        .from('telegram_channels')
-        .select('*')
-        .eq('is_default', true)
-        .single();
-
-      return data;
-    } catch (error) {
-      console.error('Error getting default channel:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Upload file to Telegram
+   * Upload file to Telegram - luôn dùng bot và chat mặc định
    */
   async uploadFile(
     file: File,
@@ -145,24 +61,17 @@ export class TelegramService {
       major?: string;
       tags?: string[];
     },
-    userId?: string
+    userId?: string,
+    userName?: string
   ): Promise<{ success: boolean; fileId?: string; error?: string }> {
     try {
-      // Get bot configuration
-      const botConfig = await this.getBotConfig(userId);
-      if (!botConfig) {
-        return { success: false, error: 'Không tìm thấy cấu hình bot' };
-      }
-
-      // Get storage channel (personal or default)
-      const channel = await this.getStorageChannel(userId);
-      if (!channel) {
-        return { success: false, error: 'Không tìm thấy kênh lưu trữ' };
-      }
+      // Luôn sử dụng bot và chat mặc định
+      const botConfig = this.getBotConfig();
+      const chatId = this.getDefaultChatId();
 
       // Prepare form data for Telegram API
       const formData = new FormData();
-      formData.append('chat_id', channel.channel_id);
+      formData.append('chat_id', chatId);
       formData.append('document', file);
       
       // Create caption with metadata
@@ -176,22 +85,41 @@ export class TelegramService {
       });
 
       const result = await response.json();
+      console.log('Telegram API response:', result);
 
       if (result.ok) {
         // Save to database
-        const document = result.result.document;
+        const messageResult = result.result;
+        
+        // Telegram có thể trả về document, video, photo, audio, animation tùy theo loại file
+        const fileInfo = messageResult.document || 
+                        messageResult.video || 
+                        messageResult.photo?.[messageResult.photo.length - 1] || // Lấy photo có resolution cao nhất
+                        messageResult.audio ||
+                        messageResult.animation ||
+                        messageResult.voice ||
+                        messageResult.video_note;
+        
+        if (!fileInfo) {
+          console.error('No file info in result:', result);
+          return { 
+            success: false, 
+            error: 'File uploaded but no file info returned' 
+          };
+        }
+
         const savedDoc = await this.saveDocumentToDatabase({
-          file_id: document.file_id,
-          file_unique_id: document.file_unique_id,
-          file_name: document.file_name || file.name,
-          file_size: document.file_size,
-          mime_type: document.mime_type || file.type,
+          file_id: fileInfo.file_id,
+          file_unique_id: fileInfo.file_unique_id,
+          file_name: fileInfo.file_name || file.name,
+          file_size: fileInfo.file_size,
+          mime_type: fileInfo.mime_type || file.type,
           description: metadata.description,
           school: metadata.school,
           major: metadata.major,
           tags: metadata.tags,
-          uploaded_by: userId,
-          telegram_user_id: result.result.from.id,
+          uploaded_by: userName || 'Ẩn danh', // Tên người upload
+          telegram_user_id: messageResult.from?.id || 0, // Bot ID (7208604161)
         });
 
         return { 
@@ -214,26 +142,12 @@ export class TelegramService {
   }
 
   /**
-   * Download file from Telegram
+   * Download file from Telegram - luôn dùng bot mặc định
    */
   async downloadFile(fileId: string, fileName: string): Promise<{ success: boolean; error?: string }> {
     try {
-      // Get document info from database
-      const { data: document } = await supabase
-        .from('documents')
-        .select('*')
-        .eq('file_id', fileId)
-        .single();
-
-      if (!document) {
-        return { success: false, error: 'Không tìm thấy tài liệu' };
-      }
-
-      // Get bot config
-      const botConfig = await this.getBotConfig(document.uploaded_by);
-      if (!botConfig) {
-        return { success: false, error: 'Không tìm thấy cấu hình bot' };
-      }
+      // Luôn sử dụng bot mặc định
+      const botConfig = this.getBotConfig();
 
       // Get file info from Telegram
       const fileInfoResponse = await fetch(`https://api.telegram.org/bot${botConfig.bot_token}/getFile?file_id=${fileId}`);
@@ -262,11 +176,12 @@ export class TelegramService {
   }
 
   /**
-   * Test bot connection
+   * Test bot connection - sử dụng bot mặc định hoặc token tùy chỉnh
    */
-  async testBotConnection(botToken: string): Promise<{ success: boolean; botInfo?: any; error?: string }> {
+  async testBotConnection(botToken?: string): Promise<{ success: boolean; botInfo?: any; error?: string }> {
     try {
-      const response = await fetch(`https://api.telegram.org/bot${botToken}/getMe`);
+      const token = botToken || TelegramService.DEFAULT_BOT_TOKEN;
+      const response = await fetch(`https://api.telegram.org/bot${token}/getMe`);
       const result = await response.json();
 
       if (result.ok) {

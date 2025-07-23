@@ -87,12 +87,26 @@ const UserMenu = ({ user, onProfileClick }: UserMenuProps) => {
           <span>Hồ sơ cá nhân</span>
         </DropdownMenuItem>
         
-        <DropdownMenuItem className="cursor-pointer">
+        <DropdownMenuItem 
+          className="cursor-pointer"
+          onClick={() => {
+            window.open('https://t.me/consenluutru_bot', '_blank');
+          }}
+        >
           <Bot className="mr-2 h-4 w-4" />
           <span>Bot Telegram</span>
         </DropdownMenuItem>
         
-        <DropdownMenuItem className="cursor-pointer">
+        <DropdownMenuItem 
+          className="cursor-pointer"
+          onClick={() => {
+            // TODO: Implement "My Documents" page
+            toast({
+              title: "Tính năng đang phát triển",
+              description: "Trang tài liệu cá nhân sẽ có sớm!",
+            });
+          }}
+        >
           <BookOpen className="mr-2 h-4 w-4" />
           <span>Tài liệu của tôi</span>
         </DropdownMenuItem>

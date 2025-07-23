@@ -6,6 +6,7 @@ import AuthModal from '@/components/AuthModal';
 import ProfileModal from '@/components/ProfileModal';
 import UserMenu from '@/components/UserMenu';
 import FileUploadModal from '@/components/FileUploadModal';
+import FilePreviewModal from '@/components/FilePreviewModal';
 import { useDocuments } from '@/hooks/useDocuments';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -42,6 +43,8 @@ const Index = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState(null);
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -77,13 +80,15 @@ const Index = () => {
   };
 
   const handleSchoolChange = (school: string) => {
-    setSelectedSchool(school);
-    searchDocuments(searchQuery, school, selectedMajor, selectedTags);
+    const actualSchool = school === "all" ? "" : school;
+    setSelectedSchool(actualSchool);
+    searchDocuments(searchQuery, actualSchool, selectedMajor, selectedTags);
   };
 
   const handleMajorChange = (major: string) => {
-    setSelectedMajor(major);
-    searchDocuments(searchQuery, selectedSchool, major, selectedTags);
+    const actualMajor = major === "all" ? "" : major;
+    setSelectedMajor(actualMajor);
+    searchDocuments(searchQuery, selectedSchool, actualMajor, selectedTags);
   };
 
   const handleTagToggle = (tag: string) => {
@@ -100,6 +105,11 @@ const Index = () => {
     setSelectedMajor('');
     setSelectedTags([]);
     searchDocuments('', '', '', []);
+  };
+
+  const handlePreview = (document: any) => {
+    setSelectedDocument(document);
+    setIsPreviewModalOpen(true);
   };
 
   return (
@@ -259,7 +269,7 @@ const Index = () => {
         </Card>
 
         {/* Documents Grid */}
-        <div className="space-y-8">
+        <div id="documents" className="space-y-8">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-bold text-gray-900">
@@ -317,6 +327,7 @@ const Index = () => {
                   key={document.id}
                   document={document}
                   onDownload={downloadDocument}
+                  onPreview={handlePreview}
                 />
               ))}
             </div>
@@ -348,6 +359,16 @@ const Index = () => {
               searchDocuments(searchQuery, selectedSchool, selectedMajor, selectedTags);
             }}
             user={user}
+          />
+
+          <FilePreviewModal
+            isOpen={isPreviewModalOpen}
+            onClose={() => {
+              setIsPreviewModalOpen(false);
+              setSelectedDocument(null);
+            }}
+            document={selectedDocument}
+            onDownload={downloadDocument}
           />
         </>
       )}

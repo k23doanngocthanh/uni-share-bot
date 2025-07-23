@@ -195,12 +195,14 @@ const FileUploadModal = ({ isOpen, onClose, onSuccess, user }: FileUploadModalPr
   const uploadToTelegram = async (file: File): Promise<string> => {
     const telegramService = TelegramService.getInstance();
     
+    const userName = user?.user_metadata?.full_name || user?.email || 'Ẩn danh';
+    
     const result = await telegramService.uploadFile(file, {
       description,
       school,
       major,
       tags: tags.length > 0 ? tags : undefined
-    }, user?.id);
+    }, user?.id, userName);
 
     if (result.success && result.fileId) {
       return result.fileId;
@@ -239,28 +241,10 @@ const FileUploadModal = ({ isOpen, onClose, onSuccess, user }: FileUploadModalPr
             ));
           }, 200);
 
-          // Upload to Telegram
+          // Upload to Telegram (TelegramService đã tự động save vào database)
           const fileId = await uploadToTelegram(uploadFile.file);
           
           clearInterval(progressInterval);
-
-          // Save to database
-          const { error } = await supabase
-            .from('documents')
-            .insert({
-              file_name: uploadFile.file.name,
-              file_size: uploadFile.file.size,
-              mime_type: uploadFile.file.type,
-              file_id: fileId,
-              description: description || null,
-              school: school || null,
-              major: major || null,
-              tags: tags.length > 0 ? tags : null,
-              telegram_user_id: 123456789, // This should come from user's Telegram ID
-              uploaded_by: user?.user_metadata?.full_name || user?.email || 'Unknown'
-            });
-
-          if (error) throw error;
 
           setFiles(prev => prev.map(f => 
             f.id === uploadFile.id 
