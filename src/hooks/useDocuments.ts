@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import TelegramService from '@/services/TelegramService';
 
 interface Document {
   id: string;
@@ -125,35 +126,26 @@ export const useDocuments = (): UseDocumentsReturn => {
 
   const downloadDocument = async (fileId: string, fileName: string) => {
     try {
-      // Call the bot API to get the file download URL
-      const botToken = 'YOUR_BOT_TOKEN'; // This should be stored securely
-      const response = await fetch(`https://api.telegram.org/bot${botToken}/getFile?file_id=${fileId}`);
-      const data = await response.json();
+      const telegramService = TelegramService.getInstance();
+      const result = await telegramService.downloadFile(fileId, fileName);
 
-      if (data.ok && data.result.file_path) {
-        const downloadUrl = `https://api.telegram.org/file/bot${botToken}/${data.result.file_path}`;
-        
-        // Create a temporary link to trigger download
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = fileName;
-        link.target = '_blank';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
+      if (result.success) {
         toast({
           title: "Đang tải xuống",
           description: `File "${fileName}" đang được tải xuống.`,
         });
       } else {
-        throw new Error('File không tồn tại hoặc đã bị xóa');
+        toast({
+          title: "Lỗi tải xuống",
+          description: result.error || "Không thể tải xuống file.",
+          variant: "destructive",
+        });
       }
-    } catch (err) {
-      console.error('Error downloading file:', err);
+    } catch (error) {
+      console.error('Error downloading document:', error);
       toast({
-        title: "Lỗi tải file",
-        description: "Không thể tải file. File có thể đã bị xóa hoặc không khả dụng.",
+        title: "Lỗi",
+        description: "Có lỗi xảy ra khi tải xuống file.",
         variant: "destructive",
       });
     }

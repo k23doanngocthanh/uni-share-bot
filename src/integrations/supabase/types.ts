@@ -65,12 +65,164 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_channels: {
+        Row: {
+          bot_config_id: string | null
+          channel_id: string
+          channel_name: string
+          channel_type: string
+          created_at: string
+          id: string
+          is_default: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          bot_config_id?: string | null
+          channel_id: string
+          channel_name: string
+          channel_type: string
+          created_at?: string
+          id?: string
+          is_default?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          bot_config_id?: string | null
+          channel_id?: string
+          channel_name?: string
+          channel_type?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_channels_bot_config_id_fkey"
+            columns: ["bot_config_id"]
+            isOneToOne: false
+            referencedRelation: "user_bot_configs"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      user_bot_configs: {
+        Row: {
+          bot_description: string | null
+          bot_status: string | null
+          bot_token: string | null
+          bot_username: string | null
+          bot_webhook_url: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          use_personal_bot: boolean
+          user_id: string
+        }
+        Insert: {
+          bot_description?: string | null
+          bot_status?: string | null
+          bot_token?: string | null
+          bot_username?: string | null
+          bot_webhook_url?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          use_personal_bot?: boolean
+          user_id: string
+        }
+        Update: {
+          bot_description?: string | null
+          bot_status?: string | null
+          bot_token?: string | null
+          bot_username?: string | null
+          bot_webhook_url?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          use_personal_bot?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_bot_configs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      user_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          major: string | null
+          school: string | null
+          telegram_user_id: number | null
+          telegram_username: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          major?: string | null
+          school?: string | null
+          telegram_user_id?: number | null
+          telegram_username?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          major?: string | null
+          school?: string | null
+          telegram_user_id?: number | null
+          telegram_username?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      document_stats: {
+        Row: {
+          contributor_count: number | null
+          document_count: number | null
+          last_upload: string | null
+          major: string | null
+          school: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      get_user_document_count: {
+        Args: {
+          user_telegram_id: number
+        }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
