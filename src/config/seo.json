@@ -11,6 +11,12 @@
     "siteName": "UniShare (Preview)",
     "companyName": "UniShare Team"
   },
+  "github": {
+    "domain": "k23doanngocthanh.github.io",
+    "baseUrl": "https://k23doanngocthanh.github.io/uni-share-bot",
+    "siteName": "UniShare (GitHub)",
+    "companyName": "UniShare Team"
+  },
   "development": {
     "domain": "localhost:5173",
     "baseUrl": "http://localhost:5173",
