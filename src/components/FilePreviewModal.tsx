@@ -74,7 +74,41 @@ const FilePreviewModal = ({ isOpen, onClose, document, onDownload }: FilePreview
     try {
       const telegramService = TelegramService.getInstance();
 
-      // Use new getFileBlob method for better error handling
+      // Check if we should use Google Viewer
+      if (useGoogleViewer(document.mime_type)) {
+        // Get file URL for Google Viewer
+        const botConfig = telegramService.getBotConfig();
+        const fileInfoResponse = await fetch(`https://api.telegram.org/bot${botConfig.bot_token}/getFile?file_id=${document.file_id}`);
+        const fileInfo = await fileInfoResponse.json();
+        
+        if (fileInfo.ok) {
+          const filePath = fileInfo.result.file_path;
+          const directUrl = `https://api.telegram.org/file/bot${botConfig.bot_token}/${filePath}`;
+          
+          // Choose viewer based on file type
+          let viewerUrl;
+          if (document.mime_type === 'application/pdf') {
+            // Use Google Docs Viewer for PDF
+            viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(directUrl)}&embedded=true`;
+          } else if (document.mime_type?.includes('presentation') || document.mime_type?.includes('powerpoint')) {
+            // Use Microsoft Office Online for PowerPoint
+            viewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(directUrl)}`;
+          } else if (document.mime_type?.includes('word') || document.mime_type?.includes('sheet') || document.mime_type?.includes('excel')) {
+            // Use Microsoft Office Online for Word/Excel
+            viewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(directUrl)}`;
+          } else {
+            // Fallback to Google Viewer
+            viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(directUrl)}&embedded=true`;
+          }
+          
+          setPreviewUrl(viewerUrl);
+        } else {
+          setError('File không khả dụng');
+        }
+        return;
+      }
+
+      // Use new getFileBlob method for other file types
       const result = await telegramService.getFileBlob(document.file_id);
 
       if (result.success && result.blob) {
@@ -112,9 +146,28 @@ const FilePreviewModal = ({ isOpen, onClose, document, onDownload }: FilePreview
     return (
       mimeType.startsWith('image/') ||
       mimeType === 'application/pdf' ||
+      mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+      mimeType === 'application/vnd.ms-powerpoint' ||
+      mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      mimeType === 'application/msword' ||
+      mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+      mimeType === 'application/vnd.ms-excel' ||
       mimeType.startsWith('video/') ||
       mimeType.startsWith('audio/') ||
       mimeType.startsWith('text/')
+    );
+  };
+
+  const useGoogleViewer = (mimeType: string | null): boolean => {
+    if (!mimeType) return false;
+    return (
+      mimeType === 'application/pdf' ||
+      mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+      mimeType === 'application/vnd.ms-powerpoint' ||
+      mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      mimeType === 'application/msword' ||
+      mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+      mimeType === 'application/vnd.ms-excel'
     );
   };
 
@@ -123,6 +176,12 @@ const FilePreviewModal = ({ isOpen, onClose, document, onDownload }: FilePreview
     
     if (mimeType.startsWith('image/')) return <ImageIcon className="h-8 w-8 text-purple-500" />;
     if (mimeType === 'application/pdf') return <FileText className="h-8 w-8 text-red-500" />;
+    if (mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' || 
+        mimeType === 'application/vnd.ms-powerpoint') return <FileText className="h-8 w-8 text-orange-500" />;
+    if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || 
+        mimeType === 'application/msword') return <FileText className="h-8 w-8 text-blue-500" />;
+    if (mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+        mimeType === 'application/vnd.ms-excel') return <FileText className="h-8 w-8 text-green-500" />;
     if (mimeType.startsWith('video/')) return <Video className="h-8 w-8 text-pink-500" />;
     if (mimeType.startsWith('audio/')) return <Music className="h-8 w-8 text-indigo-500" />;
     if (mimeType.includes('zip') || mimeType.includes('rar') || mimeType.includes('7z')) return <Archive className="h-8 w-8 text-yellow-600" />;
@@ -189,7 +248,29 @@ const FilePreviewModal = ({ isOpen, onClose, document, onDownload }: FilePreview
       );
     }
 
-    // PDF preview
+    // PDF and Office documents preview via Google Viewer
+    if (useGoogleViewer(mimeType)) {
+      return (
+        <div className="h-96 bg-gray-50 rounded-lg overflow-hidden relative">
+          <iframe
+            src={previewUrl}
+            className="w-full h-full rounded-lg border-0"
+            title={document.file_name}
+            allow="autoplay"
+            onLoad={() => console.log('Viewer loaded successfully')}
+            onError={() => console.error('Viewer failed to load')}
+          />
+          <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+            {mimeType?.includes('pdf') ? 'PDF Viewer' : 
+             mimeType?.includes('presentation') || mimeType?.includes('powerpoint') ? 'PowerPoint Viewer' :
+             mimeType?.includes('word') ? 'Word Viewer' :
+             mimeType?.includes('sheet') || mimeType?.includes('excel') ? 'Excel Viewer' : 'Document Viewer'}
+          </div>
+        </div>
+      );
+    }
+
+    // PDF preview (fallback for direct blob URLs)
     if (mimeType === 'application/pdf') {
       return (
         <div className="h-96 bg-gray-50 rounded-lg overflow-hidden">
