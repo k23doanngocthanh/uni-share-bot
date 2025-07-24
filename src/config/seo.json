@@ -1,0 +1,39 @@
+{
+  "production": {
+    "domain": "unishare.io.vn",
+    "baseUrl": "https://unishare.io.vn",
+    "siteName": "UniShare",
+    "companyName": "UniShare Vietnam"
+  },
+  "staging": {
+    "domain": "uni-share-bot.vercel.app", 
+    "baseUrl": "https://uni-share-bot.vercel.app",
+    "siteName": "UniShare (Preview)",
+    "companyName": "UniShare Team"
+  },
+  "development": {
+    "domain": "localhost:5173",
+    "baseUrl": "http://localhost:5173",
+    "siteName": "UniShare (Dev)",
+    "companyName": "UniShare Team"
+  },
+  "seo": {
+    "defaultTitle": "UniShare - Nền tảng chia sẻ tài liệu học tập miễn phí cho sinh viên",
+    "defaultDescription": "UniShare là nền tảng chia sẻ tài liệu học tập hàng đầu dành cho sinh viên Việt Nam. Tải lên, tìm kiếm và chia sẻ tài liệu học tập miễn phí. Hỗ trợ đa dạng định dạng và tích hợp Telegram Bot.",
+    "defaultKeywords": "chia sẻ tài liệu, tài liệu học tập, sinh viên, đại học, UniShare, telegram bot, tài liệu miễn phí, học tập online",
+    "twitterHandle": "@unishare_vn",
+    "facebookAppId": "",
+    "googleSiteVerification": "",
+    "bingValidation": ""
+  },
+  "contact": {
+    "email": "contact@unishare.io.vn",
+    "phone": "+84 xxx xxx xxx",
+    "address": "Việt Nam"
+  },
+  "social": {
+    "facebook": "https://facebook.com/unishare.vn",
+    "twitter": "https://twitter.com/unishare_vn",
+    "telegram": "https://t.me/unishare_bot"
+  }
+}

@@ -24,6 +24,7 @@ import { vi } from "date-fns/locale";
 interface Document {
   id: string;
   file_name: string;
+  original_file_name?: string; // Thêm để xử lý file hết hạn
   file_size: number | null;
   mime_type: string | null;
   description: string | null;
@@ -37,7 +38,7 @@ interface Document {
 
 interface DocumentCardProps {
   document: Document;
-  onDownload: (fileId: string, fileName: string) => void;
+  onDownload: (fileId: string, fileName: string, originalFileName?: string) => void;
   onPreview: (document: Document) => void;
 }
 
@@ -151,7 +152,7 @@ function DocumentCard({ document, onDownload, onPreview }: DocumentCardProps) {
               <Eye className="h-4 w-4" />
             </Button>
             <Button
-              onClick={() => onDownload(document.file_id, document.file_name)}
+              onClick={() => onDownload(document.file_id, document.file_name, document.original_file_name)}
               size="sm"
               className="bg-blue-500 hover:bg-blue-600 text-white"
             >

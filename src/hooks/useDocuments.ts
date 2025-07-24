@@ -6,6 +6,7 @@ import TelegramService from '@/services/TelegramService';
 interface Document {
   id: string;
   file_name: string;
+  original_file_name?: string; // Thêm để xử lý file hết hạn
   file_size: number | null;
   mime_type: string | null;
   file_id: string;
@@ -25,7 +26,7 @@ interface UseDocumentsReturn {
   availableMajors: string[];
   availableTags: string[];
   searchDocuments: (query: string, school?: string, major?: string, tags?: string[]) => void;
-  downloadDocument: (fileId: string, fileName: string) => Promise<void>;
+  downloadDocument: (fileId: string, fileName: string, originalFileName?: string) => Promise<void>;
 }
 
 export const useDocuments = (): UseDocumentsReturn => {
@@ -124,15 +125,15 @@ export const useDocuments = (): UseDocumentsReturn => {
     }
   };
 
-  const downloadDocument = async (fileId: string, fileName: string) => {
+  const downloadDocument = async (fileId: string, fileName: string, originalFileName?: string) => {
     try {
       const telegramService = TelegramService.getInstance();
-      const result = await telegramService.downloadFile(fileId, fileName);
+      const result = await telegramService.downloadFile(fileId, fileName, originalFileName);
 
       if (result.success) {
         toast({
           title: "Đang tải xuống",
-          description: `File "${fileName}" đang được tải xuống.`,
+          description: `File "${originalFileName || fileName}" đang được tải xuống.`,
         });
       } else {
         toast({

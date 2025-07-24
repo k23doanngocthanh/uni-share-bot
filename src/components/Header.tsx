@@ -8,11 +8,21 @@ interface HeaderProps {
   onLoginClick: () => void;
   onProfileClick: () => void;
   onUploadClick?: () => void;
+  onNavigate?: (path: string) => void; // Thêm prop để điều hướng
   UserMenuComponent: React.ComponentType<{ user: any; onProfileClick: () => void }>;
 }
 
-const Header = ({ user, onLoginClick, onProfileClick, onUploadClick, UserMenuComponent }: HeaderProps) => {
+const Header = ({ user, onLoginClick, onProfileClick, onUploadClick, onNavigate, UserMenuComponent }: HeaderProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleNavigation = (path: string) => {
+    if (onNavigate) {
+      onNavigate(path);
+    } else {
+      // Fallback cho trường hợp không có onNavigate
+      window.location.href = path;
+    }
+  };
 
   return (
     <header className="bg-white/95 backdrop-blur-sm border-b border-border/40 sticky top-0 z-40">
@@ -32,11 +42,11 @@ const Header = ({ user, onLoginClick, onProfileClick, onUploadClick, UserMenuCom
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
             <a 
-              href="#" 
+              href="/" 
               className="text-muted-foreground hover:text-foreground transition-colors"
               onClick={(e) => {
                 e.preventDefault();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                handleNavigation('/');
               }}
             >
               Trang chủ
@@ -55,23 +65,21 @@ const Header = ({ user, onLoginClick, onProfileClick, onUploadClick, UserMenuCom
               Tài liệu
             </a>
             <a 
-              href="#" 
+              href="/guide" 
               className="text-muted-foreground hover:text-foreground transition-colors"
               onClick={(e) => {
                 e.preventDefault();
-                // TODO: Add help page
-                alert('Trang hướng dẫn đang được phát triển!');
+                handleNavigation('/guide');
               }}
             >
               Hướng dẫn
             </a>
             <a 
-              href="#" 
+              href="/contact" 
               className="text-muted-foreground hover:text-foreground transition-colors"
               onClick={(e) => {
                 e.preventDefault();
-                // TODO: Add contact page
-                alert('Trang liên hệ đang được phát triển!');
+                handleNavigation('/contact');
               }}
             >
               Liên hệ
@@ -120,11 +128,11 @@ const Header = ({ user, onLoginClick, onProfileClick, onUploadClick, UserMenuCom
         )}>
           <nav className="py-4 space-y-4">
             <a 
-              href="#" 
+              href="/" 
               className="block text-muted-foreground hover:text-foreground transition-colors"
               onClick={(e) => {
                 e.preventDefault();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                handleNavigation('/');
                 setIsMobileMenuOpen(false);
               }}
             >
@@ -145,22 +153,22 @@ const Header = ({ user, onLoginClick, onProfileClick, onUploadClick, UserMenuCom
               Tài liệu
             </a>
             <a 
-              href="#" 
+              href="/guide" 
               className="block text-muted-foreground hover:text-foreground transition-colors"
               onClick={(e) => {
                 e.preventDefault();
-                alert('Trang hướng dẫn đang được phát triển!');
+                handleNavigation('/guide');
                 setIsMobileMenuOpen(false);
               }}
             >
               Hướng dẫn
             </a>
             <a 
-              href="#" 
+              href="/contact" 
               className="block text-muted-foreground hover:text-foreground transition-colors"
               onClick={(e) => {
                 e.preventDefault();
-                alert('Trang liên hệ đang được phát triển!');
+                handleNavigation('/contact');
                 setIsMobileMenuOpen(false);
               }}
             >

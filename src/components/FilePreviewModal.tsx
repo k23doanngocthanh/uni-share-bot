@@ -22,6 +22,7 @@ import TelegramService from '@/services/TelegramService';
 interface Document {
   id: string;
   file_name: string;
+  original_file_name?: string; // Thêm để xử lý file hết hạn
   file_size: number | null;
   mime_type: string | null;
   description: string | null;
@@ -37,7 +38,7 @@ interface FilePreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   document: Document | null;
-  onDownload: (fileId: string, fileName: string) => void;
+  onDownload: (fileId: string, fileName: string, originalFileName?: string) => void;
 }
 
 const FilePreviewModal = ({ isOpen, onClose, document, onDownload }: FilePreviewModalProps) => {
@@ -72,36 +73,31 @@ const FilePreviewModal = ({ isOpen, onClose, document, onDownload }: FilePreview
 
     try {
       const telegramService = TelegramService.getInstance();
-      const botConfig = telegramService.getBotConfig();
 
-      // Get file info from Telegram
-      const fileInfoResponse = await fetch(`https://api.telegram.org/bot${botConfig.bot_token}/getFile?file_id=${document.file_id}`);
-      const fileInfo = await fileInfoResponse.json();
+      // Use new getFileBlob method for better error handling
+      const result = await telegramService.getFileBlob(document.file_id);
 
-      if (fileInfo.ok) {
-        const filePath = fileInfo.result.file_path;
-        const downloadUrl = `https://api.telegram.org/file/bot${botConfig.bot_token}/${filePath}`;
-        
-        // For small files that can be previewed - load as blob
+      if (result.success && result.blob) {
+        // For small files that can be previewed
         if (canPreview(document.mime_type) && document.file_size && document.file_size < 20 * 1024 * 1024) { // 20MB limit
-          try {
-            const response = await fetch(downloadUrl);
-            if (response.ok) {
-              const blob = await response.blob();
-              const url = URL.createObjectURL(blob);
-              setPreviewUrl(url);
-            } else {
-              setPreviewUrl(downloadUrl);
-            }
-          } catch {
-            // Fallback to direct URL if blob fails
-            setPreviewUrl(downloadUrl);
-          }
+          const url = URL.createObjectURL(result.blob);
+          setPreviewUrl(url);
         } else {
-          setPreviewUrl(downloadUrl);
+          // For larger files, try to create direct URL if possible
+          const botConfig = telegramService.getBotConfig();
+          const fileInfoResponse = await fetch(`https://api.telegram.org/bot${botConfig.bot_token}/getFile?file_id=${document.file_id}`);
+          const fileInfo = await fileInfoResponse.json();
+          
+          if (fileInfo.ok) {
+            const filePath = fileInfo.result.file_path;
+            const downloadUrl = `https://api.telegram.org/file/bot${botConfig.bot_token}/${filePath}`;
+            setPreviewUrl(downloadUrl);
+          } else {
+            setError('File không khả dụng');
+          }
         }
       } else {
-        setError('Không thể tải file để xem trước');
+        setError(result.error || 'Không thể tải file để xem trước');
       }
     } catch (error) {
       console.error('Error loading preview:', error);
@@ -280,7 +276,7 @@ const FilePreviewModal = ({ isOpen, onClose, document, onDownload }: FilePreview
             </div>
             <div className="flex items-center gap-2">
               <Button
-                onClick={() => onDownload(document.file_id, document.file_name)}
+                onClick={() => onDownload(document.file_id, document.file_name, document.original_file_name)}
                 size="sm"
                 className="bg-blue-500 hover:bg-blue-600 text-white"
               >

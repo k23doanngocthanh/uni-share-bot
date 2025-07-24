@@ -12,3 +12,16 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /*.json$
+
+# Sitemap for both domains
+Sitemap: https://unishare.io.vn/sitemap.xml
+Sitemap: https://uni-share-bot.vercel.app/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1
+
+# Host preference (primary domain)
+Host: https://unishare.io.vn

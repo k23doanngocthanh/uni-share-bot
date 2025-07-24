@@ -112,6 +112,7 @@ export class TelegramService {
           file_id: fileInfo.file_id,
           file_unique_id: fileInfo.file_unique_id,
           file_name: fileInfo.file_name || file.name,
+          original_file_name: file.name, // Lưu tên file gốc với extension
           file_size: fileInfo.file_size,
           mime_type: fileInfo.mime_type || file.type,
           description: metadata.description,
@@ -143,8 +144,9 @@ export class TelegramService {
 
   /**
    * Download file from Telegram - luôn dùng bot mặc định
+   * Xử lý file hết hạn bằng cách dùng original_file_name
    */
-  async downloadFile(fileId: string, fileName: string): Promise<{ success: boolean; error?: string }> {
+  async downloadFile(fileId: string, fileName: string, originalFileName?: string): Promise<{ success: boolean; error?: string }> {
     try {
       // Luôn sử dụng bot mặc định
       const botConfig = this.getBotConfig();
@@ -157,17 +159,22 @@ export class TelegramService {
         const filePath = fileInfo.result.file_path;
         const downloadUrl = `https://api.telegram.org/file/bot${botConfig.bot_token}/${filePath}`;
         
-        // Trigger download
+        // Trigger download - ưu tiên dùng originalFileName nếu có
+        const downloadName = originalFileName || fileName;
         const link = window.document.createElement('a');
         link.href = downloadUrl;
-        link.download = fileName;
+        link.download = downloadName;
         window.document.body.appendChild(link);
         link.click();
         window.document.body.removeChild(link);
 
         return { success: true };
       } else {
-        return { success: false, error: 'Không thể tải file từ Telegram' };
+        // File có thể đã hết hạn
+        const errorMsg = fileInfo.description?.includes('expired') || fileInfo.description?.includes('not found')
+          ? 'File đã hết hạn (quá 12 giờ). Vui lòng liên hệ người upload để tải lại.'
+          : 'Không thể tải file từ Telegram';
+        return { success: false, error: errorMsg };
       }
     } catch (error) {
       console.error('Error downloading file:', error);
@@ -176,8 +183,39 @@ export class TelegramService {
   }
 
   /**
-   * Test bot connection - sử dụng bot mặc định hoặc token tùy chỉnh
+   * Get file blob for preview - xử lý file hết hạn
    */
+  async getFileBlob(fileId: string): Promise<{ success: boolean; blob?: Blob; error?: string }> {
+    try {
+      const botConfig = this.getBotConfig();
+
+      // Get file info from Telegram
+      const fileInfoResponse = await fetch(`https://api.telegram.org/bot${botConfig.bot_token}/getFile?file_id=${fileId}`);
+      const fileInfo = await fileInfoResponse.json();
+
+      if (fileInfo.ok) {
+        const filePath = fileInfo.result.file_path;
+        const downloadUrl = `https://api.telegram.org/file/bot${botConfig.bot_token}/${filePath}`;
+        
+        const response = await fetch(downloadUrl);
+        if (response.ok) {
+          const blob = await response.blob();
+          return { success: true, blob };
+        } else {
+          return { success: false, error: 'Không thể tải file từ Telegram' };
+        }
+      } else {
+        // File có thể đã hết hạn
+        const errorMsg = fileInfo.description?.includes('expired') || fileInfo.description?.includes('not found')
+          ? 'File đã hết hạn (quá 12 giờ). Telegram chỉ lưu file trong 12 giờ.'
+          : 'Không thể tải file từ Telegram';
+        return { success: false, error: errorMsg };
+      }
+    } catch (error) {
+      console.error('Error getting file blob:', error);
+      return { success: false, error: 'Lỗi khi tải file' };
+    }
+  }
   async testBotConnection(botToken?: string): Promise<{ success: boolean; botInfo?: any; error?: string }> {
     try {
       const token = botToken || TelegramService.DEFAULT_BOT_TOKEN;

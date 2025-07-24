@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://unishare.io.vn/</loc>
+    <lastmod>2025-07-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="vi" href="https://unishare.io.vn/" />
+    <xhtml:link rel="alternate" hreflang="vi" href="https://uni-share-bot.vercel.app/" />
+  </url>
+  <url>
+    <loc>https://unishare.io.vn/guide</loc>
+    <lastmod>2025-07-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="vi" href="https://unishare.io.vn/guide" />
+    <xhtml:link rel="alternate" hreflang="vi" href="https://uni-share-bot.vercel.app/guide" />
+  </url>
+  <url>
+    <loc>https://unishare.io.vn/contact</loc>
+    <lastmod>2025-07-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="vi" href="https://unishare.io.vn/contact" />
+    <xhtml:link rel="alternate" hreflang="vi" href="https://uni-share-bot.vercel.app/contact" />
+  </url>
+</urlset>

@@ -7,6 +7,8 @@ import ProfileModal from '@/components/ProfileModal';
 import UserMenu from '@/components/UserMenu';
 import FileUploadModal from '@/components/FileUploadModal';
 import FilePreviewModal from '@/components/FilePreviewModal';
+import SEO from '@/components/SEO';
+import StructuredData from '@/components/StructuredData';
 import { useDocuments } from '@/hooks/useDocuments';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -27,6 +29,54 @@ import {
 } from 'lucide-react';
 
 const Index = () => {
+  const structuredData = (config: any) => ({
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": config.siteName,
+    "alternateName": "UniShare Bot",
+    "description": config.seo.defaultDescription,
+    "url": config.baseUrl,
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": `${config.baseUrl}/?search={search_term_string}`,
+      "query-input": "required name=search_term_string"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": config.companyName,
+      "url": config.baseUrl,
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": config.contact.phone,
+        "contactType": "customer service",
+        "email": config.contact.email,
+        "availableLanguage": "Vietnamese"
+      },
+      "sameAs": [
+        config.social.facebook,
+        config.social.twitter,
+        config.social.telegram
+      ]
+    },
+    "mainEntity": {
+      "@type": "Service",
+      "name": "Dịch vụ chia sẻ tài liệu học tập",
+      "description": "Nền tảng cho phép sinh viên tải lên, tìm kiếm và chia sẻ tài liệu học tập miễn phí",
+      "provider": {
+        "@type": "Organization",
+        "name": config.companyName
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Vietnam"
+      },
+      "audience": {
+        "@type": "Audience",
+        "audienceType": "Students"
+      }
+    }
+  });
+
   const {
     documents,
     loading,
@@ -114,6 +164,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      <SEO 
+        url="/"
+      />
+      
+      <StructuredData data={structuredData} id="homepage-structured-data" />
+      
       {/* Header */}
       <Header 
         user={user}
