@@ -9,9 +9,9 @@ export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
   
   let base = '/';
-  if (isProduction && isGitHubPages) {
-    base = '/uni-share-bot/';
-  }
+  // if (isProduction && isGitHubPages) {
+  //   base = '/uni-share-bot/';
+  // }
   
   return {
     base,
