@@ -32,7 +32,7 @@ const SEO = ({
   const finalTitle = title || seoConfig.seo.defaultTitle;
   const finalDescription = description || seoConfig.seo.defaultDescription;
   const finalKeywords = keywords || seoConfig.seo.defaultKeywords;
-  const finalImage = image ? seoConfig.generateImageUrl(image) : seoConfig.generateImageUrl('/assets/hero-image.jpg');
+  const finalImage = image ? seoConfig.generateImageUrl(image) : seoConfig.generateImageUrl('/assets/og-image.jpg');
   const finalUrl = url ? seoConfig.generateUrl(url) : seoConfig.generateUrl();
 
   useEffect(() => {
@@ -63,11 +63,21 @@ const SEO = ({
     updateMetaTag('author', seoConfig.companyName);
     updateMetaTag('robots', 'index, follow');
     updateMetaTag('language', 'Vietnamese');
+    updateMetaTag('viewport', 'width=device-width, initial-scale=1.0');
+    updateMetaTag('theme-color', '#2563eb');
+    updateMetaTag('apple-mobile-web-app-capable', 'yes');
+    updateMetaTag('apple-mobile-web-app-status-bar-style', 'default');
+    updateMetaTag('apple-mobile-web-app-title', 'UniShare');
+    updateMetaTag('msapplication-TileColor', '#2563eb');
+    updateMetaTag('msapplication-config', '/browserconfig.xml');
     
     // Open Graph tags
     updateMetaTag('og:title', finalTitle, true);
     updateMetaTag('og:description', finalDescription, true);
     updateMetaTag('og:image', finalImage, true);
+    updateMetaTag('og:image:width', '1200', true);
+    updateMetaTag('og:image:height', '600', true);
+    updateMetaTag('og:image:alt', finalTitle, true);
     updateMetaTag('og:url', finalUrl, true);
     updateMetaTag('og:type', type, true);
     updateMetaTag('og:site_name', seoConfig.siteName, true);
@@ -77,7 +87,8 @@ const SEO = ({
     updateMetaTag('twitter:card', 'summary_large_image', true);
     updateMetaTag('twitter:title', finalTitle, true);
     updateMetaTag('twitter:description', finalDescription, true);
-    updateMetaTag('twitter:image', finalImage, true);
+    updateMetaTag('twitter:image', seoConfig.generateImageUrl('/assets/twitter-card.jpg'), true);
+    updateMetaTag('twitter:image:alt', finalTitle, true);
     updateMetaTag('twitter:site', seoConfig.seo.twitterHandle, true);
     
     // Article specific tags

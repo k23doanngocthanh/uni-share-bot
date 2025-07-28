@@ -193,8 +193,15 @@ const Index = () => {
 
       {/* Hero Section */}
       <div className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 text-white overflow-hidden">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/50 to-purple-600/50"></div>
+        {/* Background Image with Overlay */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
+          style={{
+            backgroundImage: 'url(/assets/hero-image.jpg)',
+          }}
+        />
+        <div className="absolute inset-0 bg-black/30"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/60 to-purple-600/60"></div>
         
         <div className="relative container mx-auto px-4 py-20">
           <div className="text-center max-w-4xl mx-auto">
