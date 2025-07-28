@@ -208,11 +208,27 @@ function DocumentCard({ document, onDownload, onPreview }: DocumentCardProps) {
             variant="ghost"
             className="h-6 px-2 text-xs hover:bg-blue-50 hover:text-blue-600"
             onClick={() => {
-              // Copy share link to clipboard
-              const shareUrl = `${window.location.origin}?document=${document.id}`;
+              // Copy direct share link to this specific document
+              const shareUrl = `${window.location.origin}/?doc=${document.id}`;
               navigator.clipboard.writeText(shareUrl).then(() => {
-                // TODO: Add toast notification
-                alert('Link chia sẻ đã được sao chép!');
+                // Use toast instead of alert
+                const toast = window.document.createElement('div');
+                toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity';
+                toast.textContent = 'Link tài liệu đã được sao chép!';
+                window.document.body.appendChild(toast);
+                setTimeout(() => {
+                  toast.style.opacity = '0';
+                  setTimeout(() => window.document.body.removeChild(toast), 300);
+                }, 2000);
+              }).catch(() => {
+                const toast = window.document.createElement('div');
+                toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+                toast.textContent = 'Không thể sao chép link!';
+                window.document.body.appendChild(toast);
+                setTimeout(() => {
+                  toast.style.opacity = '0';
+                  setTimeout(() => window.document.body.removeChild(toast), 300);
+                }, 2000);
               });
             }}
           >

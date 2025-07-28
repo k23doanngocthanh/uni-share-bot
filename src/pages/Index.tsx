@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import DocumentCard from '@/components/DocumentCard';
+import DocumentGrid from '@/components/DocumentGrid';
 import { SearchFilters } from '@/components/SearchFilters';
 import Header from '@/components/Header';
 import AuthModal from '@/components/AuthModal';
@@ -12,7 +12,6 @@ import StructuredData from '@/components/StructuredData';
 import { useDocuments } from '@/hooks/useDocuments';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   BookOpen, 
@@ -102,7 +101,7 @@ const Index = () => {
   const [selectedMajor, setSelectedMajor] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  // Check user authentication status
+  // Check user authentication status and handle direct document links
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -114,8 +113,21 @@ const Index = () => {
       setUser(session?.user ?? null);
     });
 
+    // Check for direct document link in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const docId = urlParams.get('doc');
+    if (docId) {
+      // Find and preview the document directly
+      setTimeout(() => {
+        const targetDoc = documents.find(doc => doc.id === docId);
+        if (targetDoc) {
+          handlePreview(targetDoc);
+        }
+      }, 1000); // Wait for documents to load
+    }
+
     return () => subscription.unsubscribe();
-  }, []);
+  }, [documents]);
 
   const handleSearch = useCallback(() => {
     searchDocuments(searchQuery, selectedSchool, selectedMajor, selectedTags);
@@ -325,69 +337,16 @@ const Index = () => {
         </Card>
 
         {/* Documents Grid */}
-        <div id="documents" className="space-y-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900">
-                Tài liệu mới nhất
-              </h2>
-              {documents.length > 0 && (
-                <p className="text-gray-600 mt-1">
-                  Hiển thị {documents.length} tài liệu
-                </p>
-              )}
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Clock className="h-4 w-4" />
-              Cập nhật liên tục
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <Card key={i} className="p-6 border-0 bg-white/80">
-                  <Skeleton className="h-6 w-3/4 mb-2" />
-                  <Skeleton className="h-4 w-full mb-4" />
-                  <div className="flex gap-2 mb-4">
-                    <Skeleton className="h-6 w-16" />
-                    <Skeleton className="h-6 w-20" />
-                  </div>
-                  <Skeleton className="h-10 w-full" />
-                </Card>
-              ))}
-            </div>
-          ) : error ? (
-            <Card className="p-12 text-center border-0 bg-red-50">
-              <div className="text-red-600">
-                <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                <p className="text-xl mb-2 font-semibold">Có lỗi xảy ra</p>
-                <p className="text-sm">{error}</p>
-              </div>
-            </Card>
-          ) : documents.length === 0 ? (
-            <Card className="p-12 text-center border-0 bg-gray-50">
-              <div className="text-gray-500">
-                <Search className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                <p className="text-xl mb-2 font-semibold">Không tìm thấy tài liệu</p>
-                <p className="text-sm mb-6">Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc</p>
-                <Button variant="outline" onClick={handleClearFilters}>
-                  Xóa bộ lọc
-                </Button>
-              </div>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {documents.map((document) => (
-                <DocumentCard
-                  key={document.id}
-                  document={document}
-                  onDownload={downloadDocument}
-                  onPreview={handlePreview}
-                />
-              ))}
-            </div>
-          )}
+        <div id="documents">
+          <DocumentGrid
+            documents={documents}
+            loading={loading}
+            error={error}
+            onDownload={downloadDocument}
+            onPreview={handlePreview}
+            onClearFilters={handleClearFilters}
+            itemsPerPage={12}
+          />
         </div>
       </div>
 
@@ -416,18 +375,19 @@ const Index = () => {
             }}
             user={user}
           />
-
-          <FilePreviewModal
-            isOpen={isPreviewModalOpen}
-            onClose={() => {
-              setIsPreviewModalOpen(false);
-              setSelectedDocument(null);
-            }}
-            document={selectedDocument}
-            onDownload={downloadDocument}
-          />
         </>
       )}
+
+      {/* Preview modal is available for everyone (logged in or not) */}
+      <FilePreviewModal
+        isOpen={isPreviewModalOpen}
+        onClose={() => {
+          setIsPreviewModalOpen(false);
+          setSelectedDocument(null);
+        }}
+        document={selectedDocument}
+        onDownload={downloadDocument}
+      />
     </div>
   );
 };
